@@ -1,0 +1,34 @@
+name: SQL Object Diff
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '/migrations/**'
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install PyGithub
+
+      - name: Generate SQL object diff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/sql_object_diff.py \
+            --base ${{ github.event.pull_request.base.sha }} \
+            --head ${{ github.sha }} \
+            --repo ${{ github.repository }} \
+            --pr ${{ github.event.pull_request.number }}
