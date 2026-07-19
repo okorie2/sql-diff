@@ -1,4 +1,4 @@
-from git_utils import get_merge_base, get_changed_migrations
+from git_utils import get_base_tip, get_changed_migrations
 from indexer import build_index
 from tsql_parser import extract_objects
 from comparer import compare_objects
@@ -7,7 +7,7 @@ from html_reporter import generate_html_report
 
 def main():
 
-    merge_base = get_merge_base()
+    merge_base = get_base_tip()
 
     print("Merge base:", merge_base)
 

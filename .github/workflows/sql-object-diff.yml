@@ -1,7 +1,7 @@
 name: SQL Diff Report
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
 
@@ -20,6 +20,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Fetch PR head (data only, not checked out)
+        run: git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-head
 
       - name: Setup Python
         uses: actions/setup-python@v5

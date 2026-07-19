@@ -1,16 +1,16 @@
 import subprocess
 
 
-def get_merge_base(base_branch="origin/main"):
+def get_base_tip(base_branch="origin/main"):
     return subprocess.check_output(
-        ["git", "merge-base", "HEAD", base_branch],
+        ["git", "rev-parse", base_branch],
         text=True,
     ).strip()
 
 
-def get_changed_migrations(merge_base):
+def get_changed_migrations(merge_base, head="pr-head"):
     changed_files = subprocess.check_output(
-        ["git", "diff", "--name-only", merge_base, "HEAD"],
+        ["git", "diff", "--name-only", "--diff-filter=A", merge_base, head],
         text=True,
     ).splitlines()
 
