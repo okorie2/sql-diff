@@ -1,34 +1,68 @@
-name: SQL Object Diff
+name: SQL Diff Report
 
 on:
   pull_request:
     branches:
       - main
-    paths:
-      - '/migrations/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  pages: write
+  id-token: write
 
 jobs:
-  diff:
+  build-report:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
-      - name: Install dependencies
-        run: pip install PyGithub
+      - name: Generate SQL diff report
+        run: python scripts/sql-diff/main.py
 
-      - name: Generate SQL object diff
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python scripts/sql_object_diff.py \
-            --base ${{ github.event.pull_request.base.sha }} \
-            --head ${{ github.sha }} \
-            --repo ${{ github.repository }} \
-            --pr ${{ github.event.pull_request.number }}
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: report
+
+  deploy-pages:
+    needs: build-report
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request.number;
+
+            const reportUrl = `https://${owner}.github.io/${repo}/`;
+
+            const body = `## SQL Migration Review
+
+            Detailed report: ${reportUrl}`;
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr,
+              body
+            });

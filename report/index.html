@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8">
+
+<title>SQL Migration Review</title>
+
+<style>
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin:40px;
+    max-width:1200px;
+}
+
+table {
+    border-collapse: collapse;
+    width:100%;
+}
+
+th, td {
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+th {
+    background:#f5f5f5;
+    text-align:left;
+}
+
+details {
+    margin-top:20px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    padding:10px;
+}
+
+summary {
+    cursor:pointer;
+    font-weight:bold;
+    font-size:16px;
+}
+
+.diff {
+    margin-top:15px;
+    background:#fafafa;
+    border:1px solid #ddd;
+    padding:10px;
+    font-family:Consolas, monospace;
+    white-space:pre-wrap;
+}
+
+.added {
+    background:#e6ffed;
+    color:#22863a;
+}
+
+.removed {
+    background:#ffeef0;
+    color:#cb2431;
+}
+
+.hunk {
+    color:#005cc5;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>SQL Migration Review</h1>
+
+<p>
+
+Generated:
+2026-07-19 10:53:26
+
+</p>
+
+<h2>Summary</h2>
+
+<table>
+
+<tr>
+
+<th>Object</th>
+
+<th>Status</th>
+
+<th>Previous Migration</th>
+
+</tr>
+
+
+            <tr>
+                <td>dbo.usp_AddBook</td>
+                <td>Modified</td>
+                <td>migrations/0001_addBook_EO.sql</td>
+            </tr>
+            
+
+</table>
+
+<h2>Details</h2>
+
+
+<details>
+
+<summary>dbo.usp_AddBook</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0001_addBook_EO.sql<br>
+
+<b>Current:</b> migrations/0002_update_addBook_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,6 +1,12 @@</div>
+<div class="added">+/* =====================================================================</div>
+<div class="added">+   dbo.Books is assumed to have an AuthorID FK instead of a text Author</div>
+<div class="added">+   column. If your table still has a text Author column, migrate it to</div>
+<div class="added">+   AuthorID before using this version of the proc.</div>
+<div class="added">+   ===================================================================== */</div>
+<div class="added">+</div>
+<div class=""> CREATE OR ALTER PROCEDURE dbo.usp_AddBook</div>
+<div class="">     @Title          NVARCHAR(255),</div>
+<div class="removed">-    @Author         NVARCHAR(255),</div>
+<div class="added">+    @AuthorName     NVARCHAR(255),</div>
+<div class="">     @ISBN           VARCHAR(20)     = NULL,</div>
+<div class="">     @Genre          NVARCHAR(100)   = NULL,</div>
+<div class="">     @PublishedDate  DATE            = NULL,</div>
+<div class="hunk">@@ -10,14 +16,97 @@</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="">     SET NOCOUNT ON;</div>
+<div class="added">+    SET XACT_ABORT ON;  -- ensure any error automatically rolls back the tx</div>
+<div class="added">+</div>
+<div class="added">+    /* -----------------------------------------------------------------</div>
+<div class="added">+       1. INPUT VALIDATION</div>
+<div class="added">+       Fail fast with clear, specific error messages before opening</div>
+<div class="added">+       a transaction or touching any table.</div>
+<div class="added">+       ----------------------------------------------------------------- */</div>
+<div class="added">+    IF (@Title IS NULL OR LTRIM(RTRIM(@Title)) = &#x27;&#x27;)</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        RAISERROR(&#x27;usp_AddBook: @Title cannot be null or empty.&#x27;, 16, 1);</div>
+<div class="added">+        RETURN;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+    IF (@AuthorName IS NULL OR LTRIM(RTRIM(@AuthorName)) = &#x27;&#x27;)</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        RAISERROR(&#x27;usp_AddBook: @AuthorName cannot be null or empty.&#x27;, 16, 1);</div>
+<div class="added">+        RETURN;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+    IF (@Price IS NOT NULL AND @Price &lt; 0)</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        RAISERROR(&#x27;usp_AddBook: @Price cannot be negative.&#x27;, 16, 1);</div>
+<div class="added">+        RETURN;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+    IF (@Quantity IS NULL OR @Quantity &lt; 0)</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        RAISERROR(&#x27;usp_AddBook: @Quantity cannot be null or negative.&#x27;, 16, 1);</div>
+<div class="added">+        RETURN;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+    IF (@PublishedDate IS NOT NULL AND @PublishedDate &gt; CAST(SYSUTCDATETIME() AS DATE))</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        RAISERROR(&#x27;usp_AddBook: @PublishedDate cannot be in the future.&#x27;, 16, 1);</div>
+<div class="added">+        RETURN;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+    -- Basic ISBN sanity check: allow NULL, or 10/13 digits with optional hyphens.</div>
+<div class="added">+    IF (@ISBN IS NOT NULL)</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        DECLARE @CleanIsbn VARCHAR(20) = REPLACE(@ISBN, &#x27;-&#x27;, &#x27;&#x27;);</div>
+<div class="added">+</div>
+<div class="added">+        IF (LEN(@CleanIsbn) NOT IN (10, 13) OR @CleanIsbn LIKE &#x27;%[^0-9Xx]%&#x27;)</div>
+<div class="added">+        BEGIN</div>
+<div class="added">+            RAISERROR(&#x27;usp_AddBook: @ISBN must be a valid 10 or 13 digit ISBN.&#x27;, 16, 1);</div>
+<div class="added">+            RETURN;</div>
+<div class="added">+        END</div>
+<div class="added">+    END</div>
+<div class=""> </div>
+<div class="">     BEGIN TRY</div>
+<div class="">         BEGIN TRANSACTION;</div>
+<div class=""> </div>
+<div class="added">+        /* -------------------------------------------------------------</div>
+<div class="added">+           2. DUPLICATE CHECK</div>
+<div class="added">+           Prevent the same ISBN being inserted twice (e.g. from a</div>
+<div class="added">+           double-submitted form or a retried API call).</div>
+<div class="added">+           ------------------------------------------------------------- */</div>
+<div class="added">+        IF (@ISBN IS NOT NULL AND EXISTS (SELECT 1 FROM dbo.Books WHERE ISBN = @ISBN))</div>
+<div class="added">+        BEGIN</div>
+<div class="added">+            RAISERROR(&#x27;usp_AddBook: A book with ISBN %s already exists.&#x27;, 16, 1, @ISBN);</div>
+<div class="added">+            ROLLBACK TRANSACTION;</div>
+<div class="added">+            RETURN;</div>
+<div class="added">+        END</div>
+<div class="added">+</div>
+<div class="added">+        /* -------------------------------------------------------------</div>
+<div class="added">+           3. AUTHOR LOOKUP / CREATION</div>
+<div class="added">+           Normalize authors into their own table instead of storing</div>
+<div class="added">+           free text on every book row, so the same author is never</div>
+<div class="added">+           spelled two different ways across records.</div>
+<div class="added">+           ------------------------------------------------------------- */</div>
+<div class="added">+        DECLARE @AuthorID INT;</div>
+<div class="added">+</div>
+<div class="added">+        SELECT @AuthorID = AuthorID</div>
+<div class="added">+        FROM dbo.Authors</div>
+<div class="added">+        WHERE AuthorName = @AuthorName;</div>
+<div class="added">+</div>
+<div class="added">+        IF (@AuthorID IS NULL)</div>
+<div class="added">+        BEGIN</div>
+<div class="added">+            INSERT INTO dbo.Authors (AuthorName)</div>
+<div class="added">+            VALUES (@AuthorName);</div>
+<div class="added">+</div>
+<div class="added">+            SET @AuthorID = SCOPE_IDENTITY();</div>
+<div class="added">+        END</div>
+<div class="added">+</div>
+<div class="added">+        /* -------------------------------------------------------------</div>
+<div class="added">+           4. INSERT THE BOOK</div>
+<div class="added">+           ------------------------------------------------------------- */</div>
+<div class="">         INSERT INTO dbo.Books</div>
+<div class="">         (</div>
+<div class="">             Title,</div>
+<div class="removed">-            Author,</div>
+<div class="added">+            AuthorID,</div>
+<div class="">             ISBN,</div>
+<div class="">             Genre,</div>
+<div class="">             PublishedDate,</div>
+<div class="hunk">@@ -28,7 +117,7 @@</div>
+<div class="">         VALUES</div>
+<div class="">         (</div>
+<div class="">             @Title,</div>
+<div class="removed">-            @Author,</div>
+<div class="added">+            @AuthorID,</div>
+<div class="">             @ISBN,</div>
+<div class="">             @Genre,</div>
+<div class="">             @PublishedDate,</div>
+<div class="hunk">@@ -39,10 +128,24 @@</div>
+<div class=""> </div>
+<div class="">         SET @NewBookId = SCOPE_IDENTITY();</div>
+<div class=""> </div>
+<div class="added">+        /* -------------------------------------------------------------</div>
+<div class="added">+           5. AUDIT TRAIL</div>
+<div class="added">+           Record who added the book and when, independent of any</div>
+<div class="added">+           application-level logging, so DB-level changes are always</div>
+<div class="added">+           traceable.</div>
+<div class="added">+           ------------------------------------------------------------- */</div>
+<div class="added">+        INSERT INTO dbo.BooksAudit (BookID, Action, Detail)</div>
+<div class="added">+        VALUES</div>
+<div class="added">+        (</div>
+<div class="added">+            @NewBookId,</div>
+<div class="added">+            &#x27;INSERT&#x27;,</div>
+<div class="added">+            CONCAT(&#x27;Title=&#x27;, @Title, &#x27;; AuthorID=&#x27;, @AuthorID, &#x27;; ISBN=&#x27;, ISNULL(@ISBN, &#x27;N/A&#x27;))</div>
+<div class="added">+        );</div>
+<div class="added">+</div>
+<div class="">         COMMIT TRANSACTION;</div>
+<div class="">     END TRY</div>
+<div class="">     BEGIN CATCH</div>
+<div class="removed">-        IF XACT_STATE() &lt;&gt; 0</div>
+<div class="added">+        IF (XACT_STATE() &lt;&gt; 0)</div>
+<div class="">             ROLLBACK TRANSACTION;</div>
+<div class=""> </div>
+<div class="">         THROW;</div>
+
+</div>
+
+</details>
+
+
+</body>
+
+</html>
