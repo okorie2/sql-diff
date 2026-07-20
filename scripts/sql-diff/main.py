@@ -1,4 +1,4 @@
-from git_utils import get_base_tip, get_changed_migrations
+from git_utils import get_base_tip, get_changed_migrations, read_file_at_commit
 from indexer import build_index
 from tsql_parser import extract_objects
 from comparer import compare_objects
@@ -7,20 +7,18 @@ from html_reporter import generate_html_report
 
 def main():
 
-    merge_base = get_base_tip()
+    base_tip = get_base_tip()
 
-    print("Merge base:", merge_base)
+    print("Base tip:", base_tip)
 
-    historical_index = build_index(merge_base, "migrations")
+    historical_index = build_index(base_tip, "migrations")
 
-    changed_files = get_changed_migrations(merge_base)
+    changed_files = get_changed_migrations(base_tip)
 
     changed_objects = []
 
     for file in changed_files:
-        with open(file, "r", encoding="utf-8") as f:
-            sql = f.read()
-
+        sql = read_file_at_commit("pr-head", file)
         changed_objects.extend(extract_objects(sql, source_file=file))
 
     comparisons = compare_objects(changed_objects, historical_index)
