@@ -8,9 +8,9 @@ def get_base_tip(base_branch="origin/main"):
     ).strip()
 
 
-def get_changed_migrations(merge_base, head="pr-head"):
+def get_changed_migrations(base_branch, head="pr-head"):
     changed_files = subprocess.check_output(
-        ["git", "diff", "--name-only", "--diff-filter=A", merge_base, head],
+        ["git", "diff", "--name-only", "--diff-filter=A", base_branch, head],
         text=True,
     ).splitlines()
 

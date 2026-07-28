@@ -1,5 +1,5 @@
 from git_utils import list_files_at_commit, read_file_at_commit
-from tsql_parser import extract_objects
+from sql_parser import extract_objects
 
 
 def build_index(commit, migration_directory="migrations"):

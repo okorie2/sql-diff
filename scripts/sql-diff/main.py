@@ -1,6 +1,6 @@
 from git_utils import get_base_tip, get_changed_migrations, read_file_at_commit
 from indexer import build_index
-from tsql_parser import extract_objects
+from sql_parser import extract_objects
 from comparer import compare_objects
 from html_reporter import generate_html_report
 
