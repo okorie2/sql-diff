@@ -57,7 +57,7 @@ jobs:
             const repo = context.repo.repo;
             const pr = context.payload.pull_request.number;
 
-            const reportUrl = `https://${owner}.github.io/${repo}/`;
+            const reportUrl = `https://${owner}.github.io/${repo}/pr-${pr}/`;
 
             const body = `## SQL Migration Review
 
