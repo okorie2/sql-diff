@@ -39,7 +39,7 @@ SQL Diff automates this process.
 ## How it works
 
 ```
-                Get tip of base branch
+        Get tip of base branch
                      │
                      ▼
       Read migration files at base tip
@@ -177,13 +177,13 @@ python scripts/sql-diff/main.py
 The generated report will be written to:
 
 ```
-report/index.html
+report/pr-{pr number}/index.html
 ```
 
 Open it in your browser:
 
 ```
-open report/index.html
+open report/pr-{pr number}/index.html
 ```
 
 ---
@@ -193,19 +193,14 @@ open report/index.html
 Planned enhancements include:
 
 - SQL syntax highlighting
-- SQL formatting
-- Search and filtering
 - Side-by-side diff view
-- GitHub Pages integration
-- Pull request comments containing report links
 - Support for additional SQL object types
 - Better SQL parsing for complex scripts
+- Search and filtering
 
 ---
 
 ## Motivation
-
-Traditional Git diffs work well for source code but are less effective for migration-based database development.
 
 SQL Diff aims to make reviewing SQL changes as straightforward as reviewing application code by reconstructing the previous state of database objects automatically.
 
