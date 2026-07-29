@@ -1,0 +1,839 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8">
+
+<title>SQL Migration Review</title>
+
+<style>
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin:40px;
+    max-width:1200px;
+}
+
+table {
+    border-collapse: collapse;
+    width:100%;
+}
+
+th, td {
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+th {
+    background:#f5f5f5;
+    text-align:left;
+}
+
+details {
+    margin-top:20px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    padding:10px;
+}
+
+summary {
+    cursor:pointer;
+    font-weight:bold;
+    font-size:16px;
+}
+
+.diff {
+    margin-top:15px;
+    background:#fafafa;
+    border:1px solid #ddd;
+    padding:10px;
+    font-family:Consolas, monospace;
+    white-space:pre-wrap;
+}
+
+.added {
+    background:#e6ffed;
+    color:#22863a;
+}
+
+.removed {
+    background:#ffeef0;
+    color:#cb2431;
+}
+
+.hunk {
+    color:#005cc5;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>SQL Migration Review</h1>
+
+<p>
+
+Generated:
+2026-07-29 11:02:40
+
+</p>
+
+<h2>Summary</h2>
+
+<table>
+
+<tr>
+
+<th>Object</th>
+
+<th>Status</th>
+
+<th>Previous Migration</th>
+
+</tr>
+
+
+            <tr>
+                <td>dbo.fn_GetOrderPriority</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.fn_IsValidSupplierName</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.fn_CalculateSupplierRisk</td>
+                <td>New</td>
+                <td>-</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.fn_GetOrderAgeDays</td>
+                <td>New</td>
+                <td>-</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_RenameSupplier</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_DeleteOrder</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_UpdateOrder</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_MergeWarehouse</td>
+                <td>Modified</td>
+                <td>migrations/0507_add_reporting_features.sql</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_CreateSupplier</td>
+                <td>New</td>
+                <td>-</td>
+            </tr>
+            
+            <tr>
+                <td>dbo.usp_GetOrderReport</td>
+                <td>New</td>
+                <td>-</td>
+            </tr>
+            
+
+</table>
+
+<h2>Details</h2>
+
+
+<details>
+
+<summary>dbo.fn_GetOrderPriority</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,10 +1,11 @@</div>
+<div class=""> /* -----------------------------------------------------------------------</div>
+<div class="removed">-   2. Add scalar functions</div>
+<div class="added">+   2. Update existing functions</div>
+<div class="">    ----------------------------------------------------------------------- */</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class=""> /*</div>
+<div class="removed">-   Calculates order priority based on amount.</div>
+<div class="added">+    Updated priority calculation.</div>
+<div class="added">+    Adds CRITICAL priority level.</div>
+<div class=""> */</div>
+<div class=""> CREATE OR ALTER FUNCTION dbo.fn_GetOrderPriority</div>
+<div class=""> (</div>
+<div class="hunk">@@ -13,14 +14,22 @@</div>
+<div class=""> RETURNS VARCHAR(20)</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     DECLARE @Priority VARCHAR(20);</div>
+<div class=""> </div>
+<div class="removed">-    IF (@TotalAmount &gt;= 10000)</div>
+<div class="added">+    IF @TotalAmount &gt;= 50000</div>
+<div class="added">+        SET @Priority = &#x27;CRITICAL&#x27;;</div>
+<div class="added">+</div>
+<div class="added">+    ELSE IF @TotalAmount &gt;= 10000</div>
+<div class="">         SET @Priority = &#x27;HIGH&#x27;;</div>
+<div class="removed">-    ELSE IF (@TotalAmount &gt;= 1000)</div>
+<div class="added">+</div>
+<div class="added">+    ELSE IF @TotalAmount &gt;= 1000</div>
+<div class="">         SET @Priority = &#x27;MEDIUM&#x27;;</div>
+<div class="added">+</div>
+<div class="">     ELSE</div>
+<div class="">         SET @Priority = &#x27;LOW&#x27;;</div>
+<div class=""> </div>
+<div class="added">+</div>
+<div class="">     RETURN @Priority;</div>
+<div class="added">+</div>
+<div class=""> END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.fn_IsValidSupplierName</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,5 +1,5 @@</div>
+<div class=""> /*</div>
+<div class="removed">-   Validates supplier names before updates.</div>
+<div class="added">+    Stronger supplier validation.</div>
+<div class=""> */</div>
+<div class=""> CREATE OR ALTER FUNCTION dbo.fn_IsValidSupplierName</div>
+<div class=""> (</div>
+<div class="hunk">@@ -8,13 +8,19 @@</div>
+<div class=""> RETURNS BIT</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     DECLARE @Result BIT = 0;</div>
+<div class=""> </div>
+<div class="removed">-    IF (</div>
+<div class="added">+</div>
+<div class="added">+    IF</div>
+<div class="added">+    (</div>
+<div class="">         @SupplierName IS NOT NULL</div>
+<div class="removed">-        AND LEN(TRIM(@SupplierName)) &gt;= 3</div>
+<div class="added">+        AND LEN(TRIM(@SupplierName)) BETWEEN 3 AND 150</div>
+<div class="added">+        AND @SupplierName NOT LIKE &#x27;%[^a-zA-Z0-9 ]%&#x27;</div>
+<div class="">     )</div>
+<div class="">         SET @Result = 1;</div>
+<div class=""> </div>
+<div class="added">+</div>
+<div class="">     RETURN @Result;</div>
+<div class="added">+</div>
+<div class=""> END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.fn_CalculateSupplierRisk</summary>
+
+<p>
+
+<b>Status:</b> New<br>
+
+<b>Previous:</b> -<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<p>No differences found.</p>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.fn_GetOrderAgeDays</summary>
+
+<p>
+
+<b>Status:</b> New<br>
+
+<b>Previous:</b> -<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<p>No differences found.</p>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_RenameSupplier</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,66 +1,93 @@</div>
+<div class=""> /* -----------------------------------------------------------------------</div>
+<div class="removed">-   3. Update dbo.usp_RenameSupplier</div>
+<div class="removed">-      Adds audit tracking and validation function usage</div>
+<div class="added">+   3. Update usp_RenameSupplier</div>
+<div class="">    ----------------------------------------------------------------------- */</div>
+<div class=""> </div>
+<div class="added">+</div>
+<div class=""> CREATE OR ALTER PROCEDURE dbo.usp_RenameSupplier</div>
+<div class="added">+(</div>
+<div class="">     @Param1 DECIMAL(10,2),</div>
+<div class="">     @Param2 DATETIME2(0) = NULL,</div>
+<div class="">     @Param3 DATE = NULL,</div>
+<div class="">     @UpdatedBy SYSNAME = NULL</div>
+<div class="added">+)</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     SET NOCOUNT ON;</div>
+<div class="">     SET XACT_ABORT ON;</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">     DECLARE @NewSupplierName NVARCHAR(200);</div>
+<div class=""> </div>
+<div class="removed">-    SET @NewSupplierName = CONCAT(&#x27;Supplier-&#x27;, @Param1);</div>
+<div class="added">+    SET @NewSupplierName =</div>
+<div class="added">+        CONCAT(&#x27;Supplier-&#x27;, @Param1);</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">     IF dbo.fn_IsValidSupplierName(@NewSupplierName) = 0</div>
+<div class="">     BEGIN</div>
+<div class="removed">-        RAISERROR(&#x27;usp_RenameSupplier: invalid supplier name.&#x27;,16,1);</div>
+<div class="removed">-        RETURN;</div>
+<div class="added">+        THROW 50001,</div>
+<div class="added">+        &#x27;Invalid supplier name.&#x27;,</div>
+<div class="added">+        1;</div>
+<div class="">     END</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="added">+</div>
+<div class="added">+    IF EXISTS</div>
+<div class="added">+    (</div>
+<div class="added">+        SELECT 1</div>
+<div class="added">+        FROM dbo.Suppliers</div>
+<div class="added">+        WHERE SupplierName = @NewSupplierName</div>
+<div class="added">+    )</div>
+<div class="added">+    BEGIN</div>
+<div class="added">+        THROW 50002,</div>
+<div class="added">+        &#x27;Supplier name already exists.&#x27;,</div>
+<div class="added">+        1;</div>
+<div class="added">+    END</div>
+<div class="added">+</div>
+<div class="added">+</div>
+<div class="added">+</div>
+<div class="">     BEGIN TRY</div>
+<div class="added">+</div>
+<div class="">         BEGIN TRANSACTION;</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">         UPDATE dbo.Suppliers</div>
+<div class="">         SET</div>
+<div class="">             SupplierName = @NewSupplierName,</div>
+<div class="removed">-            UpdatedAt = ISNULL(@Param2, SYSUTCDATETIME())</div>
+<div class="removed">-        WHERE EffectiveDate = ISNULL(@Param3, EffectiveDate);</div>
+<div class="added">+            UpdatedAt = ISNULL(@Param2,SYSUTCDATETIME())</div>
+<div class="added">+        WHERE EffectiveDate =</div>
+<div class="added">+              ISNULL(@Param3,EffectiveDate);</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        INSERT INTO dbo.SupplierAuditLog</div>
+<div class="added">+        INSERT dbo.SupplierAuditLog</div>
+<div class="">         (</div>
+<div class="">             SupplierName,</div>
+<div class="">             ChangedBy,</div>
+<div class="removed">-            ChangeType</div>
+<div class="added">+            ChangeType,</div>
+<div class="added">+            Details</div>
+<div class="">         )</div>
+<div class="">         VALUES</div>
+<div class="">         (</div>
+<div class="">             @NewSupplierName,</div>
+<div class="">             ISNULL(@UpdatedBy,SUSER_SNAME()),</div>
+<div class="removed">-            &#x27;RENAME&#x27;</div>
+<div class="added">+            &#x27;RENAME&#x27;,</div>
+<div class="added">+            &#x27;Supplier renamed successfully&#x27;</div>
+<div class="">         );</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        COMMIT TRANSACTION;</div>
+<div class="added">+        COMMIT;</div>
+<div class=""> </div>
+<div class="">     END TRY</div>
+<div class="added">+</div>
+<div class="">     BEGIN CATCH</div>
+<div class=""> </div>
+<div class="">         IF XACT_STATE() &lt;&gt; 0</div>
+<div class="removed">-            ROLLBACK TRANSACTION;</div>
+<div class="added">+            ROLLBACK;</div>
+<div class=""> </div>
+<div class="">         THROW;</div>
+<div class=""> </div>
+<div class="">     END CATCH</div>
+<div class="removed">-END</div>
+<div class="added">+</div>
+<div class="added">+END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_DeleteOrder</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,7 +1,7 @@</div>
+<div class=""> /* -----------------------------------------------------------------------</div>
+<div class="removed">-   4. Update dbo.usp_DeleteOrder</div>
+<div class="removed">-      Adds history tracking before cancellation</div>
+<div class="added">+   4. Update usp_DeleteOrder</div>
+<div class="">    ----------------------------------------------------------------------- */</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class=""> CREATE OR ALTER PROCEDURE dbo.usp_DeleteOrder</div>
+<div class=""> (</div>
+<div class="hunk">@@ -13,6 +13,7 @@</div>
+<div class=""> )</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     SET NOCOUNT ON;</div>
+<div class="">     SET XACT_ABORT ON;</div>
+<div class=""> </div>
+<div class="hunk">@@ -22,33 +23,38 @@</div>
+<div class="">         BEGIN TRANSACTION;</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        IF (@HardDelete = 1)</div>
+<div class="added">+        IF @HardDelete = 1</div>
+<div class="">         BEGIN</div>
+<div class=""> </div>
+<div class="removed">-            DELETE FROM dbo.Orders</div>
+<div class="added">+            INSERT dbo.OrderStatusHistory</div>
+<div class="added">+            (</div>
+<div class="added">+                OrderID,</div>
+<div class="added">+                PreviousStatus,</div>
+<div class="added">+                NewStatus,</div>
+<div class="added">+                ChangedBy,</div>
+<div class="added">+                Reason</div>
+<div class="added">+            )</div>
+<div class="added">+            SELECT</div>
+<div class="added">+                OrderID,</div>
+<div class="added">+                Status,</div>
+<div class="added">+                &#x27;DELETED&#x27;,</div>
+<div class="added">+                ISNULL(@DeletedBy,SUSER_SNAME()),</div>
+<div class="added">+                &#x27;Hard delete requested&#x27;</div>
+<div class="added">+            FROM dbo.Orders</div>
+<div class="added">+            WHERE OrderDate = @Param1</div>
+<div class="added">+            AND Status = @Param2;</div>
+<div class="added">+</div>
+<div class="added">+</div>
+<div class="added">+</div>
+<div class="added">+            DELETE dbo.Orders</div>
+<div class="">             WHERE OrderDate = @Param1</div>
+<div class="">             AND Status = @Param2;</div>
+<div class=""> </div>
+<div class="">         END</div>
+<div class="added">+</div>
+<div class="">         ELSE</div>
+<div class="added">+</div>
+<div class="">         BEGIN</div>
+<div class="removed">-</div>
+<div class="removed">-            INSERT INTO dbo.OrderStatusHistory</div>
+<div class="removed">-            (</div>
+<div class="removed">-                OrderID,</div>
+<div class="removed">-                PreviousStatus,</div>
+<div class="removed">-                NewStatus,</div>
+<div class="removed">-                ChangedBy</div>
+<div class="removed">-            )</div>
+<div class="removed">-            SELECT</div>
+<div class="removed">-                OrderID,</div>
+<div class="removed">-                Status,</div>
+<div class="removed">-                &#x27;Cancelled&#x27;,</div>
+<div class="removed">-                ISNULL(@DeletedBy,SUSER_SNAME())</div>
+<div class="removed">-            FROM dbo.Orders</div>
+<div class="removed">-            WHERE OrderDate = @Param1</div>
+<div class="removed">-            AND Status = @Param2;</div>
+<div class="removed">-</div>
+<div class=""> </div>
+<div class="">             UPDATE dbo.Orders</div>
+<div class="">             SET</div>
+<div class="hunk">@@ -60,15 +66,18 @@</div>
+<div class="">         END</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        COMMIT TRANSACTION;</div>
+<div class="added">+        COMMIT;</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class="">     END TRY</div>
+<div class="added">+</div>
+<div class="">     BEGIN CATCH</div>
+<div class=""> </div>
+<div class="">         IF XACT_STATE() &lt;&gt; 0</div>
+<div class="removed">-            ROLLBACK TRANSACTION;</div>
+<div class="added">+            ROLLBACK;</div>
+<div class=""> </div>
+<div class="">         THROW;</div>
+<div class=""> </div>
+<div class="">     END CATCH</div>
+<div class="removed">-END</div>
+<div class="added">+</div>
+<div class="added">+END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_UpdateOrder</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,7 +1,7 @@</div>
+<div class=""> /* -----------------------------------------------------------------------</div>
+<div class="removed">-   5. Update dbo.usp_UpdateOrder</div>
+<div class="removed">-      Adds automatic priority calculation</div>
+<div class="added">+   5. Update usp_UpdateOrder</div>
+<div class="">    ----------------------------------------------------------------------- */</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class=""> CREATE OR ALTER PROCEDURE dbo.usp_UpdateOrder</div>
+<div class=""> (</div>
+<div class="hunk">@@ -11,36 +11,40 @@</div>
+<div class=""> )</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     SET NOCOUNT ON;</div>
+<div class="removed">-    SET XACT_ABORT ON;</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-    BEGIN TRY</div>
+<div class="added">+    IF @Param1 NOT IN</div>
+<div class="added">+    (</div>
+<div class="added">+        &#x27;Pending&#x27;,</div>
+<div class="added">+        &#x27;Processing&#x27;,</div>
+<div class="added">+        &#x27;Completed&#x27;,</div>
+<div class="added">+        &#x27;Cancelled&#x27;</div>
+<div class="added">+    )</div>
+<div class="added">+    BEGIN</div>
+<div class=""> </div>
+<div class="removed">-        BEGIN TRANSACTION;</div>
+<div class="added">+        THROW 50003,</div>
+<div class="added">+        &#x27;Invalid order status.&#x27;,</div>
+<div class="added">+        1;</div>
+<div class="added">+</div>
+<div class="added">+    END</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        UPDATE dbo.Orders</div>
+<div class="removed">-        SET</div>
+<div class="removed">-            Status = @Param1,</div>
+<div class="removed">-            TotalAmount = ISNULL(@Param2,TotalAmount),</div>
+<div class="removed">-            Priority = dbo.fn_GetOrderPriority(</div>
+<div class="added">+</div>
+<div class="added">+    UPDATE dbo.Orders</div>
+<div class="added">+    SET</div>
+<div class="added">+        Status = @Param1,</div>
+<div class="added">+        TotalAmount =</div>
+<div class="added">+            ISNULL(@Param2,TotalAmount),</div>
+<div class="added">+        Priority =</div>
+<div class="added">+            dbo.fn_GetOrderPriority(</div>
+<div class="">                 ISNULL(@Param2,TotalAmount)</div>
+<div class="">             ),</div>
+<div class="removed">-            UpdatedBy = ISNULL(@UpdatedBy,SUSER_SNAME()),</div>
+<div class="removed">-            UpdatedAt = SYSUTCDATETIME()</div>
+<div class="removed">-        WHERE Status &lt;&gt; @Param1;</div>
+<div class="added">+        UpdatedBy =</div>
+<div class="added">+            ISNULL(@UpdatedBy,SUSER_SNAME()),</div>
+<div class="added">+        UpdatedAt =</div>
+<div class="added">+            SYSUTCDATETIME()</div>
+<div class="added">+    WHERE Status &lt;&gt; @Param1;</div>
+<div class=""> </div>
+<div class="removed">-</div>
+<div class="removed">-        COMMIT TRANSACTION;</div>
+<div class="removed">-</div>
+<div class="removed">-    END TRY</div>
+<div class="removed">-    BEGIN CATCH</div>
+<div class="removed">-</div>
+<div class="removed">-        IF XACT_STATE() &lt;&gt; 0</div>
+<div class="removed">-            ROLLBACK TRANSACTION;</div>
+<div class="removed">-</div>
+<div class="removed">-        THROW;</div>
+<div class="removed">-</div>
+<div class="removed">-    END CATCH</div>
+<div class="removed">-END</div>
+<div class="added">+END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_MergeWarehouse</summary>
+
+<p>
+
+<b>Status:</b> Modified<br>
+
+<b>Previous:</b> migrations/0507_add_reporting_features.sql<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<div class="">--- previous</div>
+<div class="">+++ current</div>
+<div class="hunk">@@ -1,23 +1,20 @@</div>
+<div class=""> /* -----------------------------------------------------------------------</div>
+<div class="removed">-   6. Update dbo.usp_MergeWarehouse</div>
+<div class="removed">-      Adds sync logging</div>
+<div class="added">+   6. Update usp_MergeWarehouse</div>
+<div class="">    ----------------------------------------------------------------------- */</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class=""> CREATE OR ALTER PROCEDURE dbo.usp_MergeWarehouse</div>
+<div class=""> (</div>
+<div class="removed">-    @Param1 DATETIME2(0) = NULL,</div>
+<div class="removed">-    @Param2 INT = NULL</div>
+<div class="added">+    @Param1 DATETIME2(0)=NULL,</div>
+<div class="added">+    @Param2 INT=NULL</div>
+<div class=""> )</div>
+<div class=""> AS</div>
+<div class=""> BEGIN</div>
+<div class="added">+</div>
+<div class="">     SET NOCOUNT ON;</div>
+<div class="removed">-    SET XACT_ABORT ON;</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">     BEGIN TRY</div>
+<div class="removed">-</div>
+<div class="removed">-        BEGIN TRANSACTION;</div>
+<div class="removed">-</div>
+<div class=""> </div>
+<div class="">         MERGE dbo.Warehouses AS target</div>
+<div class=""> </div>
+<div class="hunk">@@ -26,15 +23,18 @@</div>
+<div class="">             SELECT</div>
+<div class="">                 @Param2 WarehouseID,</div>
+<div class="">                 @Param1 LastSyncedAt</div>
+<div class="removed">-        ) AS source</div>
+<div class=""> </div>
+<div class="removed">-        ON target.WarehouseID = source.WarehouseID</div>
+<div class="added">+        ) source</div>
+<div class="added">+</div>
+<div class="added">+        ON target.WarehouseID =</div>
+<div class="added">+           source.WarehouseID</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">         WHEN MATCHED THEN</div>
+<div class=""> </div>
+<div class="">             UPDATE SET</div>
+<div class="removed">-                LastSyncedAt = source.LastSyncedAt</div>
+<div class="added">+                LastSyncedAt =</div>
+<div class="added">+                source.LastSyncedAt</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="">         WHEN NOT MATCHED THEN</div>
+<div class="hunk">@@ -52,7 +52,7 @@</div>
+<div class="">             );</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        INSERT INTO dbo.WarehouseSyncLog</div>
+<div class="added">+        INSERT dbo.WarehouseSyncLog</div>
+<div class="">         (</div>
+<div class="">             WarehouseID,</div>
+<div class="">             SyncTime,</div>
+<div class="hunk">@@ -66,15 +66,28 @@</div>
+<div class="">         );</div>
+<div class=""> </div>
+<div class=""> </div>
+<div class="removed">-        COMMIT TRANSACTION;</div>
+<div class="added">+    END TRY</div>
+<div class=""> </div>
+<div class="removed">-    END TRY</div>
+<div class="">     BEGIN CATCH</div>
+<div class=""> </div>
+<div class="removed">-        IF XACT_STATE() &lt;&gt; 0</div>
+<div class="removed">-            ROLLBACK TRANSACTION;</div>
+<div class="added">+        INSERT dbo.WarehouseSyncLog</div>
+<div class="added">+        (</div>
+<div class="added">+            WarehouseID,</div>
+<div class="added">+            SyncTime,</div>
+<div class="added">+            SyncStatus,</div>
+<div class="added">+            ErrorMessage</div>
+<div class="added">+        )</div>
+<div class="added">+        VALUES</div>
+<div class="added">+        (</div>
+<div class="added">+            @Param2,</div>
+<div class="added">+            SYSUTCDATETIME(),</div>
+<div class="added">+            &#x27;FAILED&#x27;,</div>
+<div class="added">+            ERROR_MESSAGE()</div>
+<div class="added">+        );</div>
+<div class="added">+</div>
+<div class=""> </div>
+<div class="">         THROW;</div>
+<div class=""> </div>
+<div class="">     END CATCH</div>
+<div class="removed">-END</div>
+<div class="added">+</div>
+<div class="added">+END;</div>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_CreateSupplier</summary>
+
+<p>
+
+<b>Status:</b> New<br>
+
+<b>Previous:</b> -<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<p>No differences found.</p>
+
+</div>
+
+</details>
+
+<details>
+
+<summary>dbo.usp_GetOrderReport</summary>
+
+<p>
+
+<b>Status:</b> New<br>
+
+<b>Previous:</b> -<br>
+
+<b>Current:</b> migrations/0508_reporting_audit_EO.sql
+
+</p>
+
+<div class="diff">
+
+<p>No differences found.</p>
+
+</div>
+
+</details>
+
+
+</body>
+
+</html>
