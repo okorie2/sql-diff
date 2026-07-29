@@ -1,0 +1,38 @@
+name: Cleanup SQL Diff Report
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+          fetch-depth: 0
+
+      - name: Remove PR report
+        run: |
+          rm -rf pages/pr-${{ github.event.pull_request.number }}
+
+      - name: Commit and push cleanup
+        run: |
+          cd pages
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+
+          git commit -m "Remove SQL diff report for PR #${{ github.event.pull_request.number }}" || echo "No changes"
+
+          git push origin gh-pages
