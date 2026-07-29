@@ -30,7 +30,8 @@ jobs:
 
       - name: Generate SQL diff report
         run: |
-          python scripts/sql-diff/main.py
+          python scripts/sql-diff/main.py \
+            --base-branch origin/main 
 
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4

@@ -1,7 +1,7 @@
 import subprocess
 
 
-def get_base_tip(base_branch="origin/main"):
+def get_base_tip(base_branch):
     return subprocess.check_output(
         ["git", "rev-parse", base_branch],
         text=True,

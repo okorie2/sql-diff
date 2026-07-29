@@ -3,11 +3,25 @@ from indexer import build_index
 from sql_parser import extract_objects
 from comparer import compare_objects
 from html_reporter import generate_html_report
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Generate SQL migration diff report")
+
+    parser.add_argument(
+        "--base-branch",
+        default="origin/main",
+        help="Base branch to compare against",
+    )
+
+    return parser.parse_args()
 
 
 def main():
 
-    base_tip = get_base_tip()
+    args = parse_args()
+    base_tip = get_base_tip(args.base_branch)
 
     print("Base tip:", base_tip)
 
